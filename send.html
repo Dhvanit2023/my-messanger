@@ -1,0 +1,92 @@
+<html>
+<!--
+ <style>
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            background: #f9f9f9;
+            scroll-behavior: smooth; /* Enable smooth scrolling */
+        }
+
+    </style>
+<body>
+<form method=post action=sendp.php>
+<h2>Welcome, <?php echo htmlspecialchars($username); ?></h2>
+ <div class="chat-box" id="chat-box"><iframe src="message.txt"  height=100% width=100%  ></iframe></div>  
+<input type=text name=textmessage>
+<input type=submit name=submit value=send>
+
+</form>
+</body>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            background: #f9f9f9;
+            scroll-behavior: smooth; /* Enable smooth scrolling */
+        }
+    </style>
+    <script>
+        function sendMessage(event) {
+            event.preventDefault(); 
+            const textMessage = document.getElementById("textmessage").value;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "sendp.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    document.getElementById("textmessage").value = "";
+                    loadMessages();
+                }
+            };
+            xhr.send("textmessage=" + encodeURIComponent(textMessage));
+        }
+
+        function loadMessages() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "message.txt", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    const messages = xhr.responseText.split('\n');
+                    let chatHtml = '';
+                    messages.forEach(function(message) {
+                        if (message.trim()) { 
+                            const timestamp = new Date().toLocaleTimeString();
+                            chatHtml += '<div>' + message + ' <span style="font-size: small; color: gray;"></span></div>';
+                        }
+                    });
+                    document.getElementById("chat-box").innerHTML = chatHtml; 
+                    const chatBox = document.getElementById("chat-box");
+                    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+                }
+            };
+            xhr.send();
+        }
+
+        window.onload = function() {
+            loadMessages();
+        }
+    </script>
+</head>
+<body>
+    <form id="chat-form" onsubmit="sendMessage(event)">
+        <h2>Welcome, <?php echo htmlspecialchars($username); ?></h2>
+        <div class="chat-box" id="chat-box"></div>  
+        <input type="text" id="textmessage" name="textmessage" required>
+        <input type="submit" value="Send">
+    </form>
+</body>
+
+</html>
